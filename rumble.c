@@ -128,18 +128,19 @@ static void gbp_serial_isr()
             gbp_comms.index_ = 0;
         }
 
-        if (gbp_comms.index_ > 3) {
-            gbp_comms.out_0_ = 0x8000;
-        } else {
-            if (gbp_comms.serial_in_ ==
-                (u32) ~(gbp_comms.out_1_ | (gbp_comms.out_0_ << 16))) {
-                gbp_comms.index_ += 1;
-            }
+        if (gbp_comms.index_ < 4 &&
+            gbp_comms.serial_in_ ==
+            (u32) ~(gbp_comms.out_1_ | (gbp_comms.out_0_ << 16))) {
+            gbp_comms.index_ += 1;
+        }
 
+        if (gbp_comms.index_ < 4) {
             static char const comms_handshake_data[] = {"NINTENDO"};
 
             gbp_comms.out_0_ =
                 ((const u16*)comms_handshake_data)[gbp_comms.index_];
+        } else {
+            gbp_comms.out_0_ = 0x8000;
         }
 
         gbp_comms.out_1_ = ~in_lower;
